@@ -1,0 +1,1075 @@
+//Image slider
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:app="http://schemas.android.com/apk/res-auto"
+   xmlns:tools="http://schemas.android.com/tools"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   tools:context=".MainActivity">
+
+
+   <androidx.viewpager.widget.ViewPager
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:id="@+id/iv"/>
+
+</RelativeLayout>
+
+
+Item.xml
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+   xmlns:android="http://schemas.android.com/apk/res/android"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent">
+
+      <ImageView
+       android:id="@+id/IV1"
+       android:layout_width="match_parent"
+       android:layout_height="match_parent"
+       android:contentDescription="TODO" />
+
+</LinearLayout>
+
+
+MainActivity.java
+
+package com.garima.images;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.viewpager.widget.ViewPager;
+
+import android.os.Bundle;
+
+public class MainActivity extends AppCompatActivity {
+   ViewPager viewPager;
+   ImageSlider is1;
+
+
+
+    int[] images={R.drawable.book,R.drawable.tuni,R.drawable.shiva,R.drawable.moon};
+
+   @Override
+   protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       setContentView(R.layout.activity_main);
+
+        viewPager=(ViewPager)findViewById(R.id.iv);
+       is1=new ImageSlider(MainActivity.this, images);
+       viewPager.setAdapter(is1);
+   }
+}
+
+
+ImageSlider.java
+
+package com.garima.images;
+
+import android.content.Context;
+import android.os.Build;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.viewpager.widget.PagerAdapter;
+
+import java.util.Objects;
+
+public class ImageSlider extends PagerAdapter {
+
+    Context context;
+    int[] images;
+   LayoutInflater mlf;
+
+   public ImageSlider(Context context,int[] images)
+   {
+       this.context=context;
+       this.images=images;
+       mlf = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+   }
+
+   @Override
+   public int getCount() {
+       return images.length;
+   }
+
+   @Override
+   public boolean isViewFromObject(@NonNull View view, @NonNull Object object) {
+       return view==((LinearLayout)object);
+   }
+   @RequiresApi(api = Build.VERSION_CODES.KITKAT)
+   @Override
+   public Object instantiateItem(ViewGroup vc,int position){
+
+       View itemView = mlf.inflate(R.layout.item, vc, false);
+       ImageView imageView= itemView.findViewById(R.id.IV1);
+       //imageView.setScaleType(ImageView.ScaleType.CENTER);
+       imageView.setImageResource(images[position]);
+       Objects.requireNonNull(vc).addView(itemView);
+       /*((ViewPager)vc).addView(imageView,0);*/
+       return itemView;
+   }
+
+   @Override
+   public void destroyItem(ViewGroup container, int position, Object object) {
+
+       container.removeView((LinearLayout) object);
+   }
+}
+
+
+// GPS location
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+   xmlns:tools="http://schemas.android.com/tools"
+   android:layout_width="match_parent"
+   android:layout_height="match_parent"
+   tools:context=".MainActivity" >
+
+   <TextView
+       android:id="@+id/textview1"
+       android:layout_width="wrap_content"
+       android:layout_height="wrap_content"
+       android:layout_centerHorizontal="true"
+       android:layout_centerVertical="true"
+       android:text="hello" />
+
+</RelativeLayout>
+
+
+AndroidManifest.xml
+
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+   package="com.garima.mapactivity"
+   android:versionCode="1"
+   android:versionName="1.0" >
+
+
+   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+   <uses-permission android:name="android.permission.INTERNET"/>
+   <application
+       android:allowBackup="true"
+       android:icon="@mipmap/ic_launcher"
+       android:label="MainActivity"
+       android:theme="@style/AppTheme" >
+       <activity
+           android:name="com.garima.mapactivity.MainActivity"
+           android:label="MainActivity" >
+           <intent-filter>
+               <action android:name="android.intent.action.MAIN" />
+
+               <category android:name="android.intent.category.LAUNCHER" />
+           </intent-filter>
+       </activity>
+   </application>
+</manifest>
+
+
+
+MainActivity.java
+
+package com.garima.mapactivity;
+import android.annotation.SuppressLint;
+import android.os.Bundle;
+import android.app.Activity;
+import android.content.Context;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
+import android.widget.TextView;
+
+import android.util.Log;
+
+public class MainActivity extends Activity implements LocationListener{
+   protected LocationManager locationManager;
+   protected LocationListener locationListener;
+   protected Context context;
+   TextView txtLat;
+   String lat;
+   String provider;
+   protected String latitude,longitude;
+   protected boolean gps_enabled,network_enabled;
+
+   @SuppressLint("MissingPermission")
+   @Override
+   protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+       setContentView(R.layout.activity_maps);
+       txtLat = (TextView) findViewById(R.id.textview1);
+
+       locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+       locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 5, this);
+   }
+   @Override
+   public void onLocationChanged(Location location) {
+       txtLat = (TextView) findViewById(R.id.textview1);
+       txtLat.setText("Latitude:" + location.getLatitude() + ", Longitude:" + location.getLongitude());
+   }
+
+   @Override
+   public void onProviderDisabled(String provider) {
+       Log.d("Latitude","disable");
+   }
+
+   @Override
+   public void onProviderEnabled(String provider) {
+       Log.d("Latitude","enable");
+   }
+
+   @Override
+   public void onStatusChanged(String provider, int status, Bundle extras) {
+       Log.d("Latitude","status");
+   }
+}
+
+
+// databse SQLite
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayoutxmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools"
+android:id="@+id/activity_main"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+ 
+tools:context=".MainActivity"
+android:background="@android:color/holo_blue_dark">
+ 
+<TextView
+android:text="username"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_alignParentTop="true"
+android:layout_marginTop="12dp"
+android:id="@+id/textView"
+android:textSize="18sp"
+android:textStyle="bold|italic"
+android:layout_alignParentLeft="true"
+android:layout_alignParentStart="true"
+android:gravity="center" />
+ 
+<EditText
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:inputType="textPersonName"
+android:ems="10"
+android:id="@+id/editName"
+android:textStyle="bold|italic"
+android:layout_below="@+id/textView"
+android:layout_alignParentRight="true"
+android:layout_alignParentEnd="true"
+android:hint="Enter Name"
+android:gravity="center_vertical|center" />
+ 
+<TextView
+android:text="password"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:layout_marginTop="13dp"
+android:id="@+id/textView2"
+android:textStyle="bold|italic"
+android:textSize="18sp"
+android:layout_below="@+id/editName"
+android:layout_alignParentRight="true"
+android:layout_alignParentEnd="true"
+android:gravity="center"
+android:hint="Enter Password" />
+ 
+<Button
+android:text="view_data"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button2"
+android:textSize="18sp"
+android:onClick="viewdata"
+android:textStyle="bold|italic"
+android:layout_alignBaseline="@+id/button"
+android:layout_alignBottom="@+id/button"
+android:layout_alignRight="@+id/button4"
+android:layout_alignEnd="@+id/button4" />
+ 
+<Button
+android:text="add_user"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button"
+android:textStyle="bold|italic"
+android:textSize="18sp"
+android:onClick="addUser"
+android:layout_marginLeft="28dp"
+android:layout_marginStart="28dp"
+android:layout_below="@+id/editPass"
+android:layout_alignParentLeft="true"
+android:layout_alignParentStart="true"
+android:layout_marginTop="23dp" />
+ 
+<Button
+android:text="update"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/button3"
+android:onClick="update"
+android:textStyle="normal|bold"
+android:layout_below="@+id/editText3"
+android:layout_alignLeft="@+id/button4"
+android:layout_alignStart="@+id/button4"
+android:layout_marginTop="13dp" />
+ 
+<EditText
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:inputType="textPersonName"
+android:ems="10"
+android:id="@+id/editText6"
+android:layout_alignTop="@+id/button4"
+android:layout_alignParentLeft="true"
+android:layout_alignParentStart="true"
+android:freezesText="false"
+android:hint="Enter Name to Delete Data"
+android:layout_toLeftOf="@+id/button2"
+android:layout_toStartOf="@+id/button2" />
+ 
+<Button
+android:text="delete"
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:layout_marginRight="21dp"
+android:layout_marginEnd="21dp"
+android:id="@+id/button4"
+android:onClick="delete"
+android:textStyle="normal|bold"
+tools:ignore="RelativeOverlap"
+android:layout_marginBottom="41dp"
+android:layout_alignParentBottom="true"
+android:layout_alignParentRight="true"
+android:layout_alignParentEnd="true" />
+ 
+<EditText
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:inputType="textPersonName"
+android:ems="10"
+android:layout_marginTop="47dp"
+android:id="@+id/editText3"
+android:textStyle="bold|italic"
+android:textSize="14sp"
+android:layout_below="@+id/button"
+android:layout_alignParentLeft="true"
+android:layout_alignParentStart="true"
+android:layout_marginLeft="7dp"
+android:layout_marginStart="7dp"
+android:hint="Current Name" />
+ 
+<EditText
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:inputType="textPassword"
+android:ems="10"
+android:layout_marginTop="11dp"
+android:id="@+id/editPass"
+android:hint="Enter Password"
+android:gravity="center_vertical|center"
+android:textSize="18sp"
+android:layout_below="@+id/textView2"
+android:layout_alignParentLeft="true"
+android:layout_alignParentStart="true"
+android:textAllCaps="false"
+android:textStyle="normal|bold" />
+ 
+<EditText
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:inputType="textPersonName"
+android:ems="10"
+android:id="@+id/editText5"
+android:textStyle="bold|italic"
+android:textSize="14sp"
+android:hint="New Name"
+android:layout_alignTop="@+id/button3"
+android:layout_alignLeft="@+id/editText3"
+android:layout_alignStart="@+id/editText3"
+android:layout_marginTop="32dp" />
+</RelativeLayout>
+ 
+ 
+MainActivity.Java
+package com.garima.sqliteactivity;
+
+
+
+import android.support.v4.app.*;
+
+import android.os.Bundle;
+
+import android.view.View;
+
+import android.widget.EditText;
+
+
+
+import androidx.appcompat.app.AppCompatActivity;
+
+
+
+public class MainActivityextends AppCompatActivity {
+
+EditTextName, Pass , updateold, updatenew, delete;
+
+myDbAdapterhelper;
+
+@Override
+
+protected void onCreate(Bundle savedInstanceState) {
+
+super.onCreate(savedInstanceState);
+
+setContentView(R.layout.activity_main);
+
+Name= (EditText) findViewById(R.id.editName);
+
+Pass= (EditText) findViewById(R.id.editPass);
+
+updateold= (EditText) findViewById(R.id.editText3);
+
+updatenew= (EditText) findViewById(R.id.editText5);
+
+delete = (EditText) findViewById(R.id.editText6);
+
+
+
+helper = new myDbAdapter(this);
+
+	}
+
+public void addUser(View view)
+
+	{
+
+    	String t1 = Name.getText().toString();
+
+    	String t2 = Pass.getText().toString();
+
+if(t1.isEmpty() || t2.isEmpty())
+
+    	{
+
+Message.message(getApplicationContext(),"Enter Both Name and Password");
+
+    	}
+
+else
+
+{
+
+long id = helper.insertData(t1,t2);
+
+if(id<=0)
+
+        	{
+
+Message.message(getApplicationContext(),"Insertion Unsuccessful");
+
+Name.setText("");
+
+Pass.setText("");
+
+        	} else
+
+{
+
+Message.message(getApplicationContext(),"Insertion Successful");
+
+Name.setText("");
+
+Pass.setText("");
+
+        	}
+
+    	}
+
+	}
+
+
+
+public void viewdata(View view)
+
+	{
+
+    	String data = helper.getData();
+
+Message.message(this,data);
+
+	}
+
+
+
+public void update( View view)
+
+	{
+
+    	String u1 = updateold.getText().toString();
+
+    	String u2 = updatenew.getText().toString();
+
+if(u1.isEmpty() || u2.isEmpty())
+
+    	{
+
+Message.message(getApplicationContext(),"Enter Data");
+
+    	}
+
+else
+
+{
+
+int a= helper.updateName( u1, u2);
+
+if(a<=0)
+
+        	{
+
+Message.message(getApplicationContext(),"Unsuccessful");
+
+updateold.setText("");
+
+updatenew.setText("");
+
+        	} else {
+
+Message.message(getApplicationContext(),"Updated");
+
+updateold.setText("");
+
+updatenew.setText("");
+
+        	}
+
+    	}
+
+
+
+	}
+
+public void delete( View view)
+
+	{
+
+    	String uname = delete.getText().toString();
+
+if(uname.isEmpty())
+
+    	{
+
+Message.message(getApplicationContext(),"Enter Data");
+
+    	}
+
+else{
+
+int a= helper.delete(uname);
+
+if(a<=0)
+
+        	{
+
+Message.message(getApplicationContext(),"Unsuccessful");
+
+delete.setText("");
+
+        	}
+
+else
+
+{
+
+Message.message(this, "DELETED");
+
+delete.setText("");
+
+        	}
+
+    	}
+
+	}
+
+}
+ 
+ 
+myDbAdapter.java
+package com.garima.sqliteactivity;
+
+
+
+import android.content.ContentValues;
+
+import android.content.Context;
+
+import android.database.Cursor;
+
+import android.database.sqlite.SQLiteDatabase;
+
+import android.database.sqlite.SQLiteOpenHelper;
+
+
+
+
+
+public class myDbAdapter {
+
+myDbHelper myhelper;
+
+public myDbAdapter(Context context)
+
+	{
+
+myhelper= new myDbHelper(context);
+
+	}
+
+
+
+public long insertData(String name, String pass)
+
+	{
+
+SQLiteDatabasedbb = myhelper.getWritableDatabase();
+
+ContentValuescontentValues = new ContentValues();
+
+contentValues.put(myDbHelper.NAME, name);
+
+contentValues.put(myDbHelper.MyPASSWORD, pass);
+
+long id = dbb.insert(myDbHelper.TABLE_NAME, null , contentValues);
+
+return id;
+
+	}
+
+
+
+public String getData()
+
+	{
+
+SQLiteDatabasedb = myhelper.getWritableDatabase();
+
+    	String[] columns = {myDbHelper.UID,myDbHelper.NAME,myDbHelper.MyPASSWORD};
+
+    	Cursor cursor =db.query(myDbHelper.TABLE_NAME,columns,null,null,null,null,null);
+
+StringBuffer buffer= new StringBuffer();
+
+while (cursor.moveToNext())
+
+    	{
+
+int cid =cursor.getInt(cursor.getColumnIndex(myDbHelper.UID));
+
+        	String name =cursor.getString(cursor.getColumnIndex(myDbHelper.NAME));
+
+        	String  password =cursor.getString(cursor.getColumnIndex(myDbHelper.MyPASSWORD));
+
+buffer.append(cid+ "   " + name + "   " + password +" \n");
+
+    	}
+
+return buffer.toString();
+
+	}
+
+
+
+public  int delete(String uname)
+
+	{
+
+SQLiteDatabasedb = myhelper.getWritableDatabase();
+
+    	String[] whereArgs ={uname};
+
+
+
+int count =db.delete(myDbHelper.TABLE_NAME,myDbHelper.NAME+" = ?",whereArgs);
+
+return  count;
+
+	}
+
+
+
+public int updateName(String oldName , String newName)
+
+	{
+
+SQLiteDatabasedb = myhelper.getWritableDatabase();
+
+ContentValuescontentValues = new ContentValues();
+
+contentValues.put(myDbHelper.NAME,newName);
+
+    	String[] whereArgs= {oldName};
+
+int count =db.update(myDbHelper.TABLE_NAME,contentValues, myDbHelper.NAME+" = ?",whereArgs );
+
+return count;
+
+	}
+
+
+
+static class myDbHelper extends SQLiteOpenHelper
+
+	{
+
+private static final String DATABASE_NAME = "myDatabase";	// Database Name
+
+private static final String TABLE_NAME = "myTable";   // Table Name
+
+private static final int DATABASE_Version= 1;	// Database Version
+
+private static final String UID="_id"; 	// Column I (Primary Key)
+
+private static final String NAME = "Name";	//Column II
+
+private static final String MyPASSWORD= "Password";	// Column III
+
+private static final String CREATE_TABLE = "CREATE TABLE "+TABLE_NAME+
+
+" ("+UID+" INTEGER PRIMARY KEY AUTOINCREMENT, "+NAME+" VARCHAR(255) ,"+ MyPASSWORD+" VARCHAR(225));";
+
+private static final String DROP_TABLE ="DROP TABLE IF EXISTS "+TABLE_NAME;
+
+private Context context;
+
+
+
+public myDbHelper(Context context) {
+
+super(context, DATABASE_NAME, null, DATABASE_Version);
+
+this.context=context;
+
+    	}
+
+
+
+public void onCreate(SQLiteDatabasedb) {
+
+
+
+try {
+
+db.execSQL(CREATE_TABLE);
+
+        	} catch (Exception e) {
+
+Message.message(context,""+e);
+
+        	}
+
+    	}
+
+
+
+@Override
+
+public void onUpgrade(SQLiteDatabasedb, int oldVersion, int newVersion) {
+
+try {
+
+Message.message(context,"OnUpgrade");
+
+db.execSQL(DROP_TABLE);
+
+onCreate(db);
+
+        	}catch (Exception e) {
+
+Message.message(context,""+e);
+
+        	}
+
+    	}
+
+	}
+
+}
+ 
+Message.java
+ 
+package com.garima.sqliteactivity;
+
+
+
+import android.content.Context;
+
+import android.widget.Toast;
+
+
+
+public class Message {
+
+public static void message(Context context, String message) {
+
+Toast.makeText(context, message, Toast.LENGTH_LONG).show();
+
+	}
+
+}
+
+// stopwatch
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:tools="http://schemas.android.com/tools"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+tools:context=".MainActivity">
+<TextView
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:text="Hello World!"
+android:id="@+id/tv1"
+android:layout_marginTop="50dp"
+android:layout_marginLeft="150dp"
+android:gravity="center"
+76
+android:textSize="30sp"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b1"
+android:text="START"
+android:layout_marginTop="200dp"
+android:layout_marginLeft="150dp"
+android:onClick="onClickStart"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b2"
+android:text="STOP"
+android:layout_marginTop="300dp"
+android:layout_marginLeft="150dp"
+android:onClick="onClickStop"/>
+<Button
+android:layout_width="wrap_content"
+android:layout_height="wrap_content"
+android:id="@+id/b3"
+android:text="RESET"
+android:layout_marginTop="400dp"
+android:layout_marginLeft="150dp"
+
+android:onClick="onClickReset"/>
+</RelativeLayout>
+
+
+
+
+
+Code for MainActivity.java:
+
+package com.garima.stopwatch;
+import androidx.appcompat.app.AppCompatActivity;
+import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
+import android.widget.TextView;
+public class MainActivity extends AppCompatActivity {
+private int seconds=0;
+boolean running,wasRunning;
+TextView txtv;
+Handler hl;
+@Override
+protected void onCreate(Bundle savedInstanceState) {
+super.onCreate(savedInstanceState);
+setContentView(R.layout.activity_main);
+if(savedInstanceState!=null)
+
+{
+seconds=savedInstanceState.getInt("seconds");
+running=savedInstanceState.getBoolean("running");
+wasRunning=savedInstanceState.getBoolean("wasRunning");
+}
+runTimer();
+}
+protected void onPause() {
+super.onPause();
+wasRunning=running;
+running=false;
+}
+protected void onResume()
+{
+super.onResume();
+if(wasRunning)
+running=true;
+}
+@Override
+public void onSaveInstanceState(Bundle savedInstancestate)
+{
+savedInstancestate.putInt("seconds",seconds);
+
+savedInstancestate.putBoolean("running",running);
+savedInstancestate.putBoolean("wasRunning",wasRunning);
+}
+public void onClickStart(View v)
+{
+running=true;
+}
+public void onClickStop(View v)
+{
+running=false;
+}
+public void onClickReset(View v)
+{
+running=false;
+seconds=0;
+}
+private void runTimer() {
+txtv=(TextView)findViewById(R.id.tv1);
+hl=new Handler();
+hl.post(new Runnable() {
+@Override
+public void run() {
+int hours=seconds/3600;
+int minutes=(seconds%3600)/60;
+int secs=seconds%60;
+80
+String time=String.format("%d:%02d:%02d",hours,minutes,secs);
+txtv.setText(time);
+if(running)
+{
+seconds++;
+}
+hl.postDelayed(this,100) ;
+}
+});
+}
+}
+
+// Video player
+<RelativeLayout xmlns:androclass="http://schemas.android.com/apk/res/android"  
+    xmlns:tools="http://schemas.android.com/tools"  
+    android:layout_width="match_parent"  
+    android:layout_height="match_parent"  
+    tools:context=".MainActivity" >  
+  
+    <VideoView  
+        android:id="@+id/videoView1"  
+        android:layout_width="wrap_content"  
+        android:layout_height="wrap_content"  
+        android:layout_alignParentLeft="true"  
+        android:layout_centerVertical="true" />  
+  
+</RelativeLayout>
+package com.example.video1;  
+  
+import android.net.Uri;  
+import android.os.Bundle;  
+import android.app.Activity;  
+import android.view.Menu;  
+import android.widget.MediaController;  
+import android.widget.VideoView;  
+  
+public class MainActivity extends Activity {  
+  
+    @Override  
+    protected void onCreate(Bundle savedInstanceState) {  
+        super.onCreate(savedInstanceState);  
+        setContentView(R.layout.activity_main);  
+          
+        VideoView videoView =(VideoView)findViewById(R.id.videoView1);  
+          
+                //Creating MediaController  
+        MediaController mediaController= new MediaController(this);  
+            mediaController.setAnchorView(videoView);          
+         
+              //specify the location of media file  
+           Uri uri=Uri.parse(Environment.getExternalStorageDirectory().getPath()+"/media/1.mp4");          
+                
+              //Setting MediaController and URI, then starting the videoView  
+           videoView.setMediaController(mediaController);  
+           videoView.setVideoURI(uri);          
+           videoView.requestFocus();  
+           videoView.start();  
+                     
+    }  
+  
+    @Override  
+    public boolean onCreateOptionsMenu(Menu menu) {  
+        // Inflate the menu; this adds items to the action bar if it is present.  
+        getMenuInflater().inflate(R.menu.activity_main, menu);  
+        return true;  
+    }  
+  
+}  
+
+// Graphical primitives
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+ 
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/imageView" />
+</RelativeLayout>
+package com.example.exno4;
+ 
+import android.app.Activity;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
+import android.os.Bundle;
+import android.widget.ImageView;
+ 
+public class MainActivity extends Activity 
+{
+    @Override
+    public void onCreate(Bundle savedInstanceState) 
+    {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+ 
+        //Creating a Bitmap
+        Bitmap bg = Bitmap.createBitmap(720, 1280, Bitmap.Config.ARGB_8888);
+ 
+        //Setting the Bitmap as background for the ImageView
+        ImageView i = (ImageView) findViewById(R.id.imageView);
+        i.setBackgroundDrawable(new BitmapDrawable(bg));
+ 
+        //Creating the Canvas Object
+        Canvas canvas = new Canvas(bg);
+ 
+        //Creating the Paint Object and set its color & TextSize
+        Paint paint = new Paint();
+        paint.setColor(Color.BLUE);
+        paint.setTextSize(50);
+ 
+        //To draw a Rectangle
+        canvas.drawText("Rectangle", 420, 150, paint);
+        canvas.drawRect(400, 200, 650, 700, paint);
+ 
+        //To draw a Circle
+        canvas.drawText("Circle", 120, 150, paint);
+        canvas.drawCircle(200, 350, 150, paint);
+ 
+        //To draw a Square
+        canvas.drawText("Square", 120, 800, paint);
+        canvas.drawRect(50, 850, 350, 1150, paint);
+ 
+        //To draw a Line
+        canvas.drawText("Line", 480, 800, paint);
+        canvas.drawLine(520, 850, 520, 1150, paint);
+    }
+}
